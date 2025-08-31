@@ -19,5 +19,12 @@
     "email": "charlie@test.com",
     "address": "123 Main St, Omaha, NE",
     "phone": "555-8765"
+  },
+  {
+    "id": 4,
+    "name": "markel",
+    "email": "cuesta.markel@proton.me",
+    "address": "some address",
+    "phone": "some phone"
   }
 ]
