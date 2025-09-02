@@ -1,0 +1,16 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "mcp": {
+    "my-mcp": {
+      "type": "stdio",
+      "command": "npm",
+      "args": ["run", "server:dev"]
+    }
+  },
+  "lsp": {
+    "typescript": {
+      "command": "typescript-language-server",
+      "args": ["--stdio"]
+    }
+  }
+}
