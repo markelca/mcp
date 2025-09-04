@@ -5,6 +5,7 @@ import {
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import z from "zod";
 import fs from "node:fs/promises";
+import { text } from "node:stream/consumers";
 
 const server = new McpServer({
   name: "test",
@@ -115,6 +116,27 @@ server.resource(
           uri: uri.href,
           text: JSON.stringify(user),
           mimeType: "application/json",
+        },
+      ],
+    };
+  },
+);
+
+server.prompt(
+  "generate-fake-user",
+  "Generate a fake user based on a given name",
+  {
+    name: z.string(),
+  },
+  ({ name }) => {
+    return {
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: `Generate a fake user with the name ${name}. The user should have a realistic email, address, and phone number.`,
+          },
         },
       ],
     };
