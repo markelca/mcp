@@ -3,12 +3,13 @@ import { confirm, input, select } from "@inquirer/prompts";
 import { Client } from "@modelcontextprotocol/sdk/client";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { generateText } from "ai";
+import { generateText, jsonSchema, tool, ToolSet, zodSchema } from "ai";
 import {
   Prompt,
   PromptMessage,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
+import z from "zod";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -53,6 +54,7 @@ async function main() {
 
     switch (option) {
       case "Query":
+        await handleQuery(tools);
         break;
       case "Tools":
         const toolName = await select({
@@ -195,6 +197,49 @@ async function handleServerMessagePrompt(msg: PromptMessage) {
   });
 
   return text;
+}
+
+async function handleQuery(tools: Tool[]) {
+  const query = await input({ message: "Enter your query" });
+
+  const t = tools.reduce((obj, t) => {
+    return {
+      ...obj,
+      [t.name]: {
+        description: t.description,
+        inputSchema: jsonSchema(t.inputSchema),
+        execute: async (args: Record<string, any>) => {
+          return await mcp.callTool({
+            name: t.name,
+            arguments: args,
+          });
+        },
+      },
+    };
+  }, {});
+
+  const { text, toolResults } = await generateText({
+    // model: openrouter.chat("google/gemini-2.5-flash", {
+    model: openrouter.chat("openai/gpt-5", {
+      reasoning: {
+        effort: "minimal" as "high" | "medium" | "low", // The minimal option only exists for this model, so this type cast is used to satisfy the linter
+      },
+    }),
+    prompt: query,
+    tools: t as ToolSet,
+  });
+
+  if (text) {
+    console.log(text);
+  } else if (toolResults) {
+    for (const result of toolResults) {
+      for (const content of result?.output?.content || []) {
+        console.log(content?.text);
+      }
+    }
+  } else {
+    console.log("No text generated");
+  }
 }
 
 main();

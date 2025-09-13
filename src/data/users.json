@@ -26,12 +26,5 @@
     "email": "cuesta.markel@proton.me",
     "address": "some address",
     "phone": "some phone"
-  },
-  {
-    "id": 5,
-    "name": "markel",
-    "email": "estoesnais",
-    "address": "naisnais",
-    "phone": "phonenais"
   }
 ]
