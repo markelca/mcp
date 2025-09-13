@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import z from "zod";
 import fs from "node:fs/promises";
 import { text } from "node:stream/consumers";
+import { CreateMessageResultSchema } from "@modelcontextprotocol/sdk/types.js";
 
 const server = new McpServer({
   name: "test",
@@ -142,6 +143,51 @@ server.prompt(
     };
   },
 );
+
+
+server.tool('create-random-user', "Create a random user with fake data",
+  {
+    title: "Create random user",
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
+  async () => {
+    const res = await server.server.request({
+      method: "sampling/createMessage",
+      params: {
+        messages: [
+          {
+          role: "user",
+          content: {
+            type: "text",
+            text: "Generate fake user data. The user should have a realistic email, address, and phone number. Return this data as a JSON object with no other text or formatter so it can be used with JSON.parse"
+          }
+        }
+        ],
+        maxTokens: 1024
+      }
+    }, CreateMessageResultSchema)
+
+    if (res.content.type !== 'text') {
+      return {
+        content: [{type: "text", text: "Failed to generate user data"}]
+      }
+    }
+
+    try {
+      const fakeUser = JSON.parse(res.content.text.trim().replace(/^```json/, "").replace(/```$/, ""))
+      const id = await createUser(fakeUser)
+      return {
+        content: [{type: "text", text: `User ${id} created successfully`}]
+      }
+    } catch {
+      return {
+        content: [{type: "text", text: "Failed to parse user data"}]
+      }
+    }
+  })
 
 async function createUser(user: {
   name: string;
