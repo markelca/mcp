@@ -210,6 +210,9 @@ async function handleServerMessagePrompt(msg: PromptMessage) {
 
   const { text } = await generateText({
     model: openrouter.chat(OPENROUTER_MODEL_URI, {
+      provider: {
+        require_parameters: true,
+      },
       reasoning: {
         effort: "minimal" as "high" | "medium" | "low", // The minimal option only exists for this model, so this type cast is used to satisfy the linter
       },
@@ -241,6 +244,9 @@ async function handleQuery(tools: Tool[]) {
 
   const { text, toolResults } = await generateText({
     model: openrouter.chat(OPENROUTER_MODEL_URI, {
+      provider: {
+        require_parameters: true,
+      },
       reasoning: {
         effort: REASONING_EFFORT,
       },
