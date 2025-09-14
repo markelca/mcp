@@ -9,7 +9,6 @@ import {
   PromptMessage,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import z from "zod";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -220,7 +219,7 @@ async function handleQuery(tools: Tool[]) {
 
   const { text, toolResults } = await generateText({
     // model: openrouter.chat("google/gemini-2.5-flash", {
-    model: openrouter.chat("openai/gpt-5", {
+    model: openrouter.chat("openai/gpt-5-mini", {
       reasoning: {
         effort: "minimal" as "high" | "medium" | "low", // The minimal option only exists for this model, so this type cast is used to satisfy the linter
       },
