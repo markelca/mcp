@@ -10,9 +10,7 @@ import {
   PromptMessage,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { type } from "node:os";
-
-const MODEL_URI = "openai/gpt-5";
+import { OPENROUTER_MODEL_URI, REASONING_EFFORT } from "./constants";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -58,7 +56,7 @@ async function main() {
 
     return {
       role: "user",
-      model: MODEL_URI,
+      model: OPENROUTER_MODEL_URI,
       stopReason: "endTurn",
       content: {
         type: "text",
@@ -211,7 +209,7 @@ async function handleServerMessagePrompt(msg: PromptMessage) {
   }
 
   const { text } = await generateText({
-    model: openrouter.chat(MODEL_URI, {
+    model: openrouter.chat(OPENROUTER_MODEL_URI, {
       reasoning: {
         effort: "minimal" as "high" | "medium" | "low", // The minimal option only exists for this model, so this type cast is used to satisfy the linter
       },
@@ -225,7 +223,7 @@ async function handleServerMessagePrompt(msg: PromptMessage) {
 async function handleQuery(tools: Tool[]) {
   const query = await input({ message: "Enter your query" });
 
-  const t = tools.reduce((obj, t) => {
+  const parsedTools = tools.reduce((obj, t) => {
     return {
       ...obj,
       [t.name]: {
@@ -242,14 +240,13 @@ async function handleQuery(tools: Tool[]) {
   }, {});
 
   const { text, toolResults } = await generateText({
-    // model: openrouter.chat("google/gemini-2.5-flash", {
-    model: openrouter.chat("openai/gpt-5-mini", {
+    model: openrouter.chat(OPENROUTER_MODEL_URI, {
       reasoning: {
-        effort: "minimal" as "high" | "medium" | "low", // The minimal option only exists for this model, so this type cast is used to satisfy the linter
+        effort: REASONING_EFFORT,
       },
     }),
     prompt: query,
-    tools: t as ToolSet,
+    tools: parsedTools as ToolSet,
   });
 
   if (text) {
