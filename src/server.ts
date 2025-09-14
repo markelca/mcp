@@ -163,7 +163,7 @@ server.tool(
               role: "user",
               content: {
                 type: "text",
-                text: "Generate fake user data. The user should have a realistic email, address, and phone number. Return this data as a JSON object with no other text or formatter so it can be used with JSON.parse",
+                text: 'Generate fake user data. The user should have a realistic email, address, and phone number. Return this data as a JSON object with no other text or formatter so it can be used with JSON.parse\nExample: {"id": 3,"name": "Charlie Brown","email": "charlie@test.com","address": "123 Main St, Omaha, NE","phone": "555-8765"}',
               },
             },
           ],

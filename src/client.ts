@@ -47,8 +47,6 @@ async function main() {
       mcp.listResourceTemplates(),
     ]);
 
-  console.log("tools", tools);
-
   mcp.setRequestHandler(CreateMessageRequestSchema, async (request) => {
     const texts: string[] = [];
     for (const message of request.params.messages) {
