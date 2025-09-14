@@ -3,12 +3,16 @@ import { confirm, input, select } from "@inquirer/prompts";
 import { Client } from "@modelcontextprotocol/sdk/client";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { generateText, jsonSchema, tool, ToolSet, zodSchema } from "ai";
+import { generateText, jsonSchema, ToolSet } from "ai";
 import {
+  CreateMessageRequestSchema,
   Prompt,
   PromptMessage,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
+import { type } from "node:os";
+
+const MODEL_URI = "openai/gpt-5";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -42,6 +46,28 @@ async function main() {
       mcp.listPrompts(),
       mcp.listResourceTemplates(),
     ]);
+
+  console.log("tools", tools);
+
+  mcp.setRequestHandler(CreateMessageRequestSchema, async (request) => {
+    const texts: string[] = [];
+    for (const message of request.params.messages) {
+      const text = await handleServerMessagePrompt(message);
+      if (text != null) {
+        texts.push(text);
+      }
+    }
+
+    return {
+      role: "user",
+      model: MODEL_URI,
+      stopReason: "endTurn",
+      content: {
+        type: "text",
+        text: texts.join("\n"),
+      },
+    };
+  });
 
   console.log("You are connected");
 
@@ -187,7 +213,7 @@ async function handleServerMessagePrompt(msg: PromptMessage) {
   }
 
   const { text } = await generateText({
-    model: openrouter.chat("openai/gpt-5", {
+    model: openrouter.chat(MODEL_URI, {
       reasoning: {
         effort: "minimal" as "high" | "medium" | "low", // The minimal option only exists for this model, so this type cast is used to satisfy the linter
       },
