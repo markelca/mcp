@@ -2,9 +2,10 @@
   "$schema": "https://charm.land/crush.json",
   "mcp": {
     "my-mcp": {
-      "type": "stdio",
-      "command": "npm",
-      "args": ["run", "server:dev"]
+      "type": "http",
+      "url": "http://localhost:5000/mcp",
+      "timeout": 120,
+      "disabled": false
     }
   },
   "lsp": {

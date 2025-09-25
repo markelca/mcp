@@ -2,7 +2,7 @@ import "dotenv/config";
 import { confirm, input, select } from "@inquirer/prompts";
 import { Client } from "@modelcontextprotocol/sdk/client";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { generateText, jsonSchema, ToolSet } from "ai";
 import {
   CreateMessageRequestSchema,
@@ -28,11 +28,8 @@ const mcp = new Client(
   },
 );
 
-const transport = new StdioClientTransport({
-  command: "node",
-  args: ["build/server.js"],
-  stderr: "ignore",
-});
+const baseUrl = process.env.MCP_SERVER_URL ?? "http://localhost:5000/mcp";
+const transport = new StreamableHTTPClientTransport(new URL(baseUrl));
 
 async function main() {
   await mcp.connect(transport);
